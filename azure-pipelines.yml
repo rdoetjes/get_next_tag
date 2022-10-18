@@ -89,9 +89,9 @@ stages:
                     git checkout master
                     git merge binaries
                     git add 'binaries/*'
-                    git add --chmod=+x -- binaries/linux-x64/get_next_tag
-                    git add --chmod=+x -- binaries/mac-x64/get_next_tag
-                    git add --chmod=+x -- binaries/win-x64/get_next_tag.exe
+                    git add --chmod=+x -- binaries/x64/get_next_tag-lin/get_next_tag
+                    git add --chmod=+x -- binaries/x64/get_next_tag-mac/get_next_tag
+                    git add --chmod=+x -- binaries/x64/get_next_tag-win/get_next_tag.exe
                     git commit -am "deployed binaries [skip ci]"
                     git push
                     git tag -a build_$(Build.BuildNumber) -m "BUILD $(Build.BuildNumber)"
