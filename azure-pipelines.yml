@@ -86,7 +86,7 @@ stages:
                     git config --global user.email "buildagent@phonax.com"
                     git config --global user.name "Build Agent"
                     git branch binaries
-                    git checkout main
+                    git checkout master
                     git merge binaries
                     git add 'binaries/*'
                     git add --chmod=+x -- binaries/linux-x64/get_next_tag
