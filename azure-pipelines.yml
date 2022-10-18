@@ -1,0 +1,99 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  - main
+
+stages:
+  - stage: Build
+    displayName: "Build Replacer"
+    jobs:
+      #Test and build for Linux, Windows and MacOS
+      - job: build
+        displayName: "Test and build"
+        strategy:
+          #Use the following Azure build agents and set the os variable (used in artifact name)
+          matrix:
+            linux:
+              imageName: 'ubuntu-latest'
+              os: "lin"
+            mac:
+              imageName: 'macOS-latest'
+              os: "mac"
+            windows:
+              imageName: 'windows-latest'
+              os: "win"
+        #Use the Azure vmImage to build the solution
+        pool: 
+          vmImage: $(imageName)
+
+        steps: 
+          #INSTALLS RUST then runs: cargo test, cargo build --release
+          - template: pipeline-templates/rust-build.yml
+
+          #Copy the binaries to this artifact staging directory called: <os>/<binary>
+          - task: CopyFiles@2
+            condition: succeeded()
+            displayName: "Copy binaries only"
+            inputs:
+              SourceFolder: '$(Build.SourcesDirectory)/target/release/'
+              Contents: |
+                replacer
+                replacer.exe
+              TargetFolder: '$(Build.ArtifactStagingDirectory)/'
+
+          #Build the artifect for each os. Name the artidact replace-<os>
+          - task: PublishBuildArtifacts@1
+            displayName: "Package artifact"
+            condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+              ArtifactName: replacer-x64-$(os)
+              publishLocation: 'Container'
+
+  #Deploy the succesfully build binaries into replacer git repo under directory binaries
+  - stage: deploy
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    displayName:  "Deploy to GIT"
+    pool: 
+      vmImage: 'ubuntu-latest'
+    jobs:
+      - job: enrich
+        displayName: "Enrich Repo with binary artifacts"
+        condition: succeeded()
+        steps:
+          #Persist git credentials to do the pushanf commit later on
+          - checkout: self
+            persistCredentials: true
+
+          #Download all artifacts and store them where source code is checked out
+          - task: DownloadBuildArtifacts@1
+            displayName: "Merge Artifacts in Repo"
+            inputs:
+              buildVersionToDownload: latest
+              buildType: current
+              downloadType: specific
+              checkDownloadedFiles: true
+              downloadPath: '$(Build.Repository.LocalPath)/binaries/x64'
+          #Add the binaries directory to git commit and merge to main.
+          #the [skip ci] in remark prevents an infinite loop by skipping ci
+          #and we tag this release
+          - script: |
+                    set -e
+                    git config --global user.email "buildagent@phonax.com"
+                    git config --global user.name "Build Agent"
+                    git branch binaries
+                    git checkout main
+                    git merge binaries
+                    git add 'binaries/*'
+                    git add --chmod=+x -- binaries/x64/replacer-x64-lin/replacer
+                    git add --chmod=+x -- binaries/x64/replacer-x64-mac/replacer
+                    git add --chmod=+x -- binaries/x64/replacer-x64-win/replacer.exe
+                    git commit -am "deployed binaries [skip ci]"
+                    git push
+                    git tag -a build_$(Build.BuildNumber) -m "BUILD $(Build.BuildNumber)"
+                    git push origin build_$(Build.BuildNumber) 
+            displayName: "Enrich repo with binaries"
