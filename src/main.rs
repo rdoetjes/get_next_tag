@@ -37,7 +37,10 @@ fn get_last_tag(tags: String) -> String {
     
     last_tag = match re.captures(last_tag){
         Some(x) => x.get(1).unwrap().as_str(),
-        None => panic!("The right tag cannot be found!"),
+        None => {
+            eprintln!("The right tag cannot be found!");
+            std::process::exit(1)
+        },
     };
     last_tag.to_string()
 }
