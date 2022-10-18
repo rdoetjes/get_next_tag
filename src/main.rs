@@ -46,7 +46,13 @@ fn get_last_tag(tags: String) -> String {
         if tag != ""{
             tags_sorted.push(tag)
         }
-    }    
+    }   
+
+    //when no match found return 0.0.0 as the fist ever version
+    if tags_sorted.len() ==0{
+        return "0.0.0".to_string();
+    }
+
     let mut last_tag = tags_sorted[tags_sorted.len()-1];
     let re = Regex::new(r"/.*/(.*)$").unwrap();
     
