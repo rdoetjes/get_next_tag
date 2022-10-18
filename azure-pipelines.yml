@@ -8,7 +8,7 @@ trigger:
 
 stages:
   - stage: Build
-    displayName: "Build Replacer"
+    displayName: "Build git_next_tag"
     jobs:
       #Test and build for Linux, Windows and MacOS
       - job: build
@@ -40,8 +40,8 @@ stages:
             inputs:
               SourceFolder: '$(Build.SourcesDirectory)/target/release/'
               Contents: |
-                replacer
-                replacer.exe
+                git_next_tag
+                git_next_tag.exe
               TargetFolder: '$(Build.ArtifactStagingDirectory)/'
 
           #Build the artifect for each os. Name the artidact replace-<os>
@@ -50,7 +50,7 @@ stages:
             condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
             inputs:
               PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-              ArtifactName: replacer-x64-$(os)
+              ArtifactName: git_next_tag-$(os)
               publishLocation: 'Container'
 
   #Deploy the succesfully build binaries into replacer git repo under directory binaries
@@ -89,9 +89,9 @@ stages:
                     git checkout main
                     git merge binaries
                     git add 'binaries/*'
-                    git add --chmod=+x -- binaries/x64/replacer-x64-lin/replacer
-                    git add --chmod=+x -- binaries/x64/replacer-x64-mac/replacer
-                    git add --chmod=+x -- binaries/x64/replacer-x64-win/replacer.exe
+                    git add --chmod=+x -- binaries/linux-x64/get_next_tag
+                    git add --chmod=+x -- binaries/mac-x64/get_next_tag
+                    git add --chmod=+x -- binaries/win-x64/get_next_tag.exe
                     git commit -am "deployed binaries [skip ci]"
                     git push
                     git tag -a build_$(Build.BuildNumber) -m "BUILD $(Build.BuildNumber)"
