@@ -1,4 +1,6 @@
-use std::{process::{Command, Stdio}, io::Read};
+use std::{process::{Command, Stdio}, io::Read, str::FromStr};
+
+use regex::Regex;
 
 fn get_tags_as_string() -> String {
     let process = match Command::new("git")
@@ -23,16 +25,33 @@ fn get_tags_as_string() -> String {
     s
 }
 
-fn turn_tags_into_number(tags: String){
+fn get_last_tag(tags: String) -> String {
     let mut tags_sorted = Vec::new();
     for tag in tags.split("\n"){
-        tags_sorted.push(tag)
-    }
+        if tag != ""{
+            tags_sorted.push(tag)
+        }
+    }    
+    let mut last_tag = tags_sorted[tags_sorted.len()-1];
+    let re = Regex::new(r"/.*/(.*)$").unwrap();
     
-    tags_sorted.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
-    println!("{}", tags_sorted[1]);
+    last_tag = match re.captures(last_tag){
+        Some(x) => x.get(1).unwrap().as_str(),
+        None => panic!("The right tag cannot be found!"),
+    };
+    last_tag.to_string()
+}
+
+fn next_tag(tag: String) -> String {
+    let vec: Vec<&str> = tag.split(".").collect();
+    let mut c: i32 = FromStr::from_str(vec[2]).unwrap();
+    c+=1;
+    let result = format!("{}.{}.{}", vec[0], vec[1], c.to_string());    
+    result
 }
 
 fn main() {
-    turn_tags_into_number(get_tags_as_string());
+    let last_tag = get_last_tag(get_tags_as_string());
+    let new_tag = next_tag(last_tag);
+    println!("{}", new_tag);
 }
