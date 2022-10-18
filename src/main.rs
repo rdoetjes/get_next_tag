@@ -35,5 +35,4 @@ fn turn_tags_into_number(tags: String){
 
 fn main() {
     turn_tags_into_number(get_tags_as_string());
-    
 }
