@@ -40,8 +40,8 @@ stages:
             inputs:
               SourceFolder: '$(Build.SourcesDirectory)/target/release/'
               Contents: |
-                git_next_tag
-                git_next_tag.exe
+                get_next_tag
+                get_next_tag.exe
               TargetFolder: '$(Build.ArtifactStagingDirectory)/'
 
           #Build the artifect for each os. Name the artidact replace-<os>
