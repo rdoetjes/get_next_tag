@@ -56,5 +56,5 @@ fn next_tag(tag: String) -> String {
 fn main() {
     let last_tag = get_last_tag(get_tags_as_string());
     let new_tag = next_tag(last_tag);
-    println!("{}", new_tag);
+    println!("##vso[task.setvariable variable=next_tag_version]{}", new_tag);
 }
