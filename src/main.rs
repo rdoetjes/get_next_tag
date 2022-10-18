@@ -2,7 +2,7 @@ use std::{process::{Command, Stdio}, io::Read};
 
 fn get_tags_as_string() -> String {
     let process = match Command::new("git")
-    .args(["tag"])
+    .args(["ls-remote", "--tags", "--sort=committerdate"])
     .stdout(Stdio::piped())
     .spawn() {
         Err(why) => {
@@ -30,7 +30,7 @@ fn turn_tags_into_number(tags: String){
     }
     
     tags_sorted.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
-    println!("{:?}", tags_sorted);
+    println!("{}", tags_sorted[1]);
 }
 
 fn main() {
