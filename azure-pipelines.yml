@@ -83,13 +83,14 @@ stages:
           #and we tag this release
           - script: |
                     set -e
+                    git config --global init.defaultBranch = master
                     git config --global user.email "buildagent@phonax.com"
                     git config --global user.name "Build Agent"
                     git branch binaries
                     git checkout binaries
                     git add $(Build.Repository.LocalPath)/binaries/*
                     git commit -am "deployed binaries [skip ci]"
-                    git checkout $Env:BUILD_SOURCEVERSION -q
+                    git checkout master
                     git merge binaries
                     git commit -am 'merged'
                     git push origin HEAD:master
