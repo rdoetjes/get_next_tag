@@ -90,7 +90,7 @@ stages:
                     echo "3"
                     git branch binaries
                     echo "4"
-                    git checkout master
+                    git checkout origin/master
                     echo "5"
                     git merge binaries
                     echo "6"
