@@ -87,10 +87,7 @@ stages:
                     git config --global user.name "Build Agent"
                     git branch binaries
                     git checkout binaries
-                    git add 'binaries/*'
-                    git add --chmod=+x -- binaries/x64/get_next_tag-lin/get_next_tag
-                    git add --chmod=+x -- binaries/x64/get_next_tag-mac/get_next_tag
-                    git add --chmod=+x -- binaries/x64/get_next_tag-win/get_next_tag.exe
+                    git add $(Build.Repository.LocalPath)/binaries/*
                     git commit -am "deployed binaries [skip ci]"
                     git checkout origin/master
                     git merge binaries
