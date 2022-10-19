@@ -89,7 +89,7 @@ stages:
                     git checkout binaries
                     git add $(Build.Repository.LocalPath)/binaries/*
                     git commit -am "deployed binaries [skip ci]"
-                    git checkout origin/master
+                    git checkout $Env:BUILD_SOURCEVERSION -q
                     git merge binaries
                     git commit -am 'merged'
                     git push origin HEAD:master
